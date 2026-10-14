@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-14
+
 ### Added
 
 - Public IPv4 detection every 1 to 60 minutes (5 by default) through three
@@ -28,3 +30,6 @@ the notes of the version's GitHub Release.
 - A "Public IP" dashboard widget with an "Update DNS now" button.
 - A "Test detection and DNS" button: every service once, then a dry run of
   the DNS providers.
+
+[Unreleased]: https://github.com/LM1LC3N7/gladys-public-ip/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/LM1LC3N7/gladys-public-ip/releases/tag/v0.1.1

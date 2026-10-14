@@ -1,6 +1,6 @@
 {
   "name": "gladys-public-ip",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Public IP address for Gladys Assistant: IPv4 and IPv6 detection, \"public IP changed\" and internet lost / restored scene triggers, optional dynamic DNS updates (Duck DNS, Cloudflare). No account needed.",
   "type": "module",
