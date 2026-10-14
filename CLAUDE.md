@@ -138,7 +138,8 @@ test/helpers/          a fake Internet (echo services, Duck DNS, a small
 ## Choices made where the spec left room
 
 - The trigger field values are `ipv4` / `ipv6` (readable in a message as
-  `{{family}}`), and "any" is the empty field (equality matching).
+  `{{triggerEvent.data.family}}`), and "any" is the empty field (equality
+  matching).
 - Duck DNS AAAA is opt-in (`duckdns_ipv6`, off): many routers drop incoming
   IPv6, and a AAAA record would then break access that works over IPv4.
   Cloudflare updates the AAAA records that exist: their presence is the
