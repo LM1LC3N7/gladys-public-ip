@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result": [
+    {
+      "id": "023e105f4ecef8ad9ca31a8372d0c353",
+      "name": "example.com",
+      "status": "active",
+      "paused": false,
+      "type": "full",
+      "name_servers": ["bob.ns.cloudflare.com", "lola.ns.cloudflare.com"]
+    }
+  ],
+  "result_info": { "page": 1, "per_page": 20, "count": 1, "total_count": 1, "total_pages": 1 }
+}

@@ -1,0 +1,51 @@
+{
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result": [
+    {
+      "id": "372e67954025e0ba6aaa6d586b9e0b59",
+      "name": "home.example.com",
+      "type": "A",
+      "content": "9.9.9.9",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": "Gladys",
+      "tags": [],
+      "created_on": "2026-01-01T05:20:00.12345Z",
+      "modified_on": "2026-01-01T05:20:00.12345Z"
+    },
+    {
+      "id": "6b8e0ae4fb7b4c4a8b9c2c1dbd0c9a11",
+      "name": "home.example.com",
+      "type": "AAAA",
+      "content": "2620:fe::fe",
+      "proxiable": true,
+      "proxied": false,
+      "ttl": 300,
+      "settings": {},
+      "meta": {},
+      "tags": [],
+      "created_on": "2026-01-01T05:20:00.12345Z",
+      "modified_on": "2026-01-01T05:20:00.12345Z"
+    },
+    {
+      "id": "8f1d7b0e5c2a4f3e9d6b1a0c7e4f2d3b",
+      "name": "home.example.com",
+      "type": "TXT",
+      "content": "\"v=spf1 -all\"",
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 3600,
+      "settings": {},
+      "meta": {},
+      "tags": [],
+      "created_on": "2026-01-01T05:20:00.12345Z",
+      "modified_on": "2026-01-01T05:20:00.12345Z"
+    }
+  ],
+  "result_info": { "page": 1, "per_page": 100, "count": 3, "total_count": 3, "total_pages": 1 }
+}

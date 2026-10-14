@@ -1,0 +1,347 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Public IP",
+  "description": {
+    "en": "Unofficial connector: public IP, IP change and outage triggers, Duck DNS and Cloudflare updates.",
+    "fr": "Connecteur non officiel : IP publique, changement d'IP, coupures, mise à jour Duck DNS/Cloudflare."
+  },
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-public-ip:0.1.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-public-ip/main/cover.png",
+  "categories": ["network"],
+  "transports": ["cloud"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Your public IP address in Gladys",
+        "fr": "Votre adresse IP publique dans Gladys"
+      },
+      "description": {
+        "en": "Unofficial connector, not affiliated with ipify, icanhazip, ident.me, Duck DNS or Cloudflare. No account needed: the public address of your home is asked to three free IP services in turn, and a change is only believed once two of them agree. You get an \"Internet\" device (connected, IPv4, IPv6) to add from Discovery, the scene triggers \"public IP changed\", \"Internet lost\" and \"Internet restored\", two scene actions and a dashboard widget. Optionally, a Duck DNS or Cloudflare name follows the address (sections below).",
+        "fr": "Connecteur non officiel, sans lien avec ipify, icanhazip, ident.me, Duck DNS ni Cloudflare. Aucun compte nécessaire : l'adresse publique de votre maison est demandée tour à tour à trois services d'IP gratuits, et un changement n'est retenu que lorsque deux d'entre eux sont d'accord. Vous obtenez un appareil « Internet » (connecté, IPv4, IPv6) à ajouter depuis Découverte, les déclencheurs de scène « IP publique changée », « Internet coupé » et « Internet rétabli », deux actions de scène et un widget. En option, un nom Duck DNS ou Cloudflare suit l'adresse (sections ci-dessous)."
+      },
+      "links": [
+        {
+          "url": "https://github.com/LM1LC3N7/gladys-public-ip/blob/main/docs/fr.md",
+          "label": { "en": "Guide (French)", "fr": "Guide (français)" }
+        },
+        {
+          "url": "https://github.com/LM1LC3N7/gladys-public-ip/blob/main/docs/en.md",
+          "label": { "en": "Guide (English)", "fr": "Guide (anglais)" }
+        }
+      ]
+    },
+    {
+      "key": "interval",
+      "type": "number",
+      "label": { "en": "Check interval (minutes)", "fr": "Intervalle de vérification (minutes)" },
+      "description": {
+        "en": "How often the public address is checked. One small request per check; while the Internet looks down, every minute.",
+        "fr": "Fréquence de vérification de l'adresse publique. Une petite requête par vérification ; chaque minute tant qu'Internet semble coupé."
+      },
+      "required": false,
+      "default": 5,
+      "min": 1,
+      "max": 60
+    },
+    {
+      "key": "failures_before_lost",
+      "type": "number",
+      "label": {
+        "en": "Failed checks before \"Internet lost\"",
+        "fr": "Vérifications en échec avant « Internet coupé »"
+      },
+      "description": {
+        "en": "The Internet is declared lost when no IP service answers this many checks in a row.",
+        "fr": "Internet est déclaré coupé quand aucun service d'IP ne répond à autant de vérifications de suite."
+      },
+      "required": false,
+      "default": 2,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "detect_ipv6",
+      "type": "boolean",
+      "label": { "en": "Detect the public IPv6 too", "fr": "Détecter aussi l'IPv6 publique" },
+      "description": {
+        "en": "Only works when the container has IPv6 (a Docker bridge usually has not: it is then reported calmly and probed every 30 minutes).",
+        "fr": "Ne fonctionne que si le conteneur a l'IPv6 (un pont Docker ne l'a généralement pas : c'est alors signalé calmement et revérifié toutes les 30 minutes)."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "duckdns",
+      "type": "section",
+      "label": { "en": "Duck DNS (optional)", "fr": "Duck DNS (facultatif)" },
+      "description": {
+        "en": "Keep a name.duckdns.org pointed at your home. Fill the sub-domains and the token shown on duckdns.org once signed in; leave them empty to turn it off. The name is updated at start and whenever the address changes.",
+        "fr": "Garde un nom.duckdns.org pointé vers votre maison. Indiquez les sous-domaines et le jeton affiché sur duckdns.org une fois connecté ; laissez-les vides pour désactiver. Le nom est mis à jour au démarrage et à chaque changement d'adresse."
+      },
+      "links": [
+        { "url": "https://www.duckdns.org/", "label": { "en": "Duck DNS", "fr": "Duck DNS" } },
+        {
+          "url": "https://www.duckdns.org/spec.jsp",
+          "label": { "en": "Duck DNS update API", "fr": "API de mise à jour Duck DNS" }
+        }
+      ]
+    },
+    {
+      "key": "duckdns_domains",
+      "type": "string",
+      "label": { "en": "Duck DNS sub-domains", "fr": "Sous-domaines Duck DNS" },
+      "description": {
+        "en": "Separated by commas, with or without .duckdns.org.",
+        "fr": "Séparés par des virgules, avec ou sans .duckdns.org."
+      },
+      "required": false,
+      "placeholder": { "en": "myhome, myhome-vpn", "fr": "mamaison, mamaison-vpn" }
+    },
+    {
+      "key": "duckdns_token",
+      "type": "secret",
+      "label": { "en": "Duck DNS token", "fr": "Jeton Duck DNS" },
+      "required": false
+    },
+    {
+      "key": "duckdns_ipv6",
+      "type": "boolean",
+      "label": {
+        "en": "Also send the IPv6 to Duck DNS (AAAA)",
+        "fr": "Envoyer aussi l'IPv6 à Duck DNS (AAAA)"
+      },
+      "description": {
+        "en": "Off by default: an IPv6 name is only useful when your router lets incoming IPv6 through.",
+        "fr": "Désactivé par défaut : un nom IPv6 n'est utile que si votre box laisse entrer l'IPv6."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "cloudflare",
+      "type": "section",
+      "label": { "en": "Cloudflare DNS (optional)", "fr": "DNS Cloudflare (facultatif)" },
+      "description": {
+        "en": "Keep A / AAAA records of a domain managed by Cloudflare pointed at your home. Create an API token from the \"Edit zone DNS\" template, limited to that zone. Only the address (content) of existing records is changed: their proxy status and TTL are kept, no record is ever created or deleted. Leave the fields empty to turn it off.",
+        "fr": "Garde des enregistrements A / AAAA d'un domaine géré par Cloudflare pointés vers votre maison. Créez un jeton d'API à partir du modèle « Edit zone DNS », limité à cette zone. Seule l'adresse (contenu) des enregistrements existants change : leur proxy et leur TTL sont conservés, aucun enregistrement n'est jamais créé ni supprimé. Laissez les champs vides pour désactiver."
+      },
+      "links": [
+        {
+          "url": "https://dash.cloudflare.com/profile/api-tokens",
+          "label": { "en": "Cloudflare API tokens", "fr": "Jetons d'API Cloudflare" }
+        },
+        {
+          "url": "https://developers.cloudflare.com/fundamentals/api/get-started/create-token/",
+          "label": { "en": "Create a token (guide)", "fr": "Créer un jeton (guide)" }
+        }
+      ]
+    },
+    {
+      "key": "cloudflare_token",
+      "type": "secret",
+      "label": { "en": "Cloudflare API token", "fr": "Jeton d'API Cloudflare" },
+      "required": false
+    },
+    {
+      "key": "cloudflare_zone",
+      "type": "string",
+      "label": { "en": "Zone (domain name or Zone ID)", "fr": "Zone (nom de domaine ou Zone ID)" },
+      "required": false,
+      "placeholder": { "en": "example.com", "fr": "exemple.fr" }
+    },
+    {
+      "key": "cloudflare_records",
+      "type": "string",
+      "label": { "en": "Record names to update", "fr": "Noms des enregistrements à mettre à jour" },
+      "description": {
+        "en": "Separated by commas: full names, a name relative to the zone, or @ for the zone itself.",
+        "fr": "Séparés par des virgules : noms complets, nom relatif à la zone, ou @ pour la zone elle-même."
+      },
+      "required": false,
+      "placeholder": {
+        "en": "home.example.com, vpn.example.com",
+        "fr": "maison.exemple.fr, vpn.exemple.fr"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "timeout_seconds": 60,
+      "label": { "en": "Test detection and DNS", "fr": "Tester la détection et le DNS" },
+      "description": {
+        "en": "Asks every IP service once, then checks each DNS provider without writing anything (Cloudflare token, zone and records; Duck DNS has no dry run).",
+        "fr": "Interroge chaque service d'IP une fois, puis vérifie chaque fournisseur DNS sans rien écrire (jeton, zone et enregistrements Cloudflare ; Duck DNS n'a pas de mode test)."
+      }
+    }
+  ],
+  "widgets": [
+    {
+      "key": "public_ip",
+      "label": { "en": "Public IP", "fr": "IP publique" },
+      "description": {
+        "en": "The connection, the public IPv4 and IPv6, the DNS providers and an \"Update DNS now\" button.",
+        "fr": "La connexion, les IPv4 et IPv6 publiques, les fournisseurs DNS et un bouton de mise à jour du DNS."
+      },
+      "icon": "globe",
+      "action_timeout_seconds": 60
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "public_ip_changed",
+      "label": { "en": "Public IP changed", "fr": "IP publique changée" },
+      "description": {
+        "en": "The public address of the house changed (confirmed by two IP services).",
+        "fr": "L'adresse publique de la maison a changé (confirmé par deux services d'IP)."
+      },
+      "fields": [
+        {
+          "key": "family",
+          "type": "select",
+          "required": false,
+          "label": { "en": "IP version (empty: both)", "fr": "Version d'IP (vide : les deux)" },
+          "options": [
+            { "value": "ipv4", "label": { "en": "IPv4", "fr": "IPv4" } },
+            { "value": "ipv6", "label": { "en": "IPv6", "fr": "IPv6" } }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "family",
+          "type": "string",
+          "label": { "en": "IP version (ipv4, ipv6)", "fr": "Version d'IP (ipv4, ipv6)" }
+        },
+        {
+          "key": "old_ip",
+          "type": "string",
+          "label": { "en": "Old address", "fr": "Ancienne adresse" }
+        },
+        {
+          "key": "new_ip",
+          "type": "string",
+          "label": { "en": "New address", "fr": "Nouvelle adresse" }
+        }
+      ]
+    },
+    {
+      "key": "internet_lost",
+      "label": { "en": "Internet lost", "fr": "Internet coupé" },
+      "description": {
+        "en": "No IP service answered for the chosen number of checks in a row (only a connection seen up first).",
+        "fr": "Aucun service d'IP n'a répondu au nombre choisi de vérifications de suite (seulement après une connexion vue active)."
+      },
+      "variables": [
+        {
+          "key": "lost_at",
+          "type": "string",
+          "label": {
+            "en": "First failed check (ISO)",
+            "fr": "Première vérification en échec (ISO)"
+          }
+        },
+        {
+          "key": "ipv4",
+          "type": "string",
+          "label": { "en": "Last known IPv4", "fr": "Dernière IPv4 connue" }
+        }
+      ]
+    },
+    {
+      "key": "internet_restored",
+      "label": { "en": "Internet restored", "fr": "Internet rétabli" },
+      "description": {
+        "en": "The IP services answer again after an \"Internet lost\".",
+        "fr": "Les services d'IP répondent de nouveau après un « Internet coupé »."
+      },
+      "variables": [
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": { "en": "Outage duration (minutes)", "fr": "Durée de la coupure (minutes)" }
+        },
+        {
+          "key": "lost_at",
+          "type": "string",
+          "label": { "en": "Outage start (ISO)", "fr": "Début de la coupure (ISO)" }
+        },
+        {
+          "key": "ipv4",
+          "type": "string",
+          "label": { "en": "Public IPv4", "fr": "IPv4 publique" }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "get_public_ip",
+      "label": { "en": "Get the public IP", "fr": "Lire l'IP publique" },
+      "description": {
+        "en": "The addresses found by the last check, for a message or a condition that follows.",
+        "fr": "Les adresses trouvées à la dernière vérification, pour un message ou une condition qui suit."
+      },
+      "timeout_seconds": 30,
+      "outputs": [
+        {
+          "key": "ipv4",
+          "type": "string",
+          "label": { "en": "Public IPv4", "fr": "IPv4 publique" }
+        },
+        {
+          "key": "ipv6",
+          "type": "string",
+          "label": { "en": "Public IPv6", "fr": "IPv6 publique" }
+        },
+        {
+          "key": "last_change",
+          "type": "string",
+          "label": {
+            "en": "Last IPv4 change seen (ISO, empty if none since the start)",
+            "fr": "Dernier changement d'IPv4 vu (ISO, vide si aucun depuis le démarrage)"
+          }
+        },
+        {
+          "key": "online",
+          "type": "boolean",
+          "label": { "en": "Internet connected", "fr": "Internet connecté" }
+        }
+      ]
+    },
+    {
+      "key": "update_dns_now",
+      "label": { "en": "Update the DNS now", "fr": "Mettre à jour le DNS maintenant" },
+      "description": {
+        "en": "Pushes the current address to every configured DNS provider, even after an error.",
+        "fr": "Envoie l'adresse actuelle à chaque fournisseur DNS configuré, même après une erreur."
+      },
+      "timeout_seconds": 60,
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": { "en": "Every provider succeeded", "fr": "Tous les fournisseurs ont réussi" }
+        },
+        {
+          "key": "updated",
+          "type": "number",
+          "label": {
+            "en": "Providers whose record changed",
+            "fr": "Fournisseurs dont l'enregistrement a changé"
+          }
+        },
+        {
+          "key": "error",
+          "type": "string",
+          "label": { "en": "First error (empty if none)", "fr": "Première erreur (vide si aucune)" }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "success": false,
+  "errors": [
+    {
+      "code": 10502,
+      "message": "Too many authentication failures. Please try again later."
+    }
+  ],
+  "messages": [],
+  "result": null
+}
